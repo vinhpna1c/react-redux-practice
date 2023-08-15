@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
+
+import { useDispatch, useSelector } from 'react-redux';
 import './App.css';
+import { RootState } from './store';
+import { useState } from 'react';
+import { add, remove, done } from './store/reducers/todo.r';
+import { ToDoStatus } from './models/todo.d';
+import ToDoItem from './components/ToDoItem';
 
 function App() {
+  const todos = useSelector((state: RootState) => {
+    return state.todo.todos;
+  })
+  const dispatch = useDispatch();
+  const [newTask, setNewTask] = useState("");
+  console.log("new task ", newTask)
+  const handleRemove = (taskId: string) => {
+    dispatch(remove({ id: taskId }));
+  }
+  const handleDone = (taskId: string) => {
+    dispatch(done(taskId));
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div>
+        <input placeholder='Add new todo' onChange={(e) => { setNewTask(e.target.value) }} />
+        <button onClick={() => {
+          dispatch(add({
+            id: '',
+            title: newTask,
+            status: ToDoStatus.PENDING
+          })
+          );
+          setNewTask("");
+        }}>Add</button>
+      </div>
+      <div className='todo-container'>
+        <ul >
+          {todos.map((todo, index) =>
+            <ToDoItem key={index} todo={todo} onDone={() => handleDone(todo.id)} onRemove={() => handleRemove(todo.id)} />)
+          }
+        </ul>
+
+      </div>
     </div>
   );
 }
